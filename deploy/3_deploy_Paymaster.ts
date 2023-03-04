@@ -12,9 +12,17 @@ const deployPaymaster: DeployFunction = async function (hre: HardhatRuntimeEnvir
     'VerifyingPaymaster', {
       from,
       args: [entrypoint.address, verifyingSigner],
-      gasLimit: 6e6,
       deterministicDeployment: true
     })
+  if (paymaster.newlyDeployed) {
+    console.log("deposit for paymaster...")
+    await hre.deployments.execute(
+      'EntryPoint',
+      {from: from, log: true, value: ethers.utils.parseEther("10")},
+      'depositTo',
+      paymaster.address
+    )
+  }
   console.log('==VerifyingPaymaster addr=', paymaster.address)
 }
 

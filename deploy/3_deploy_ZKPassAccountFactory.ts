@@ -19,7 +19,6 @@ const deployZKPassAccountFactory: DeployFunction = async function (hre: HardhatR
     'ZKPassAccountFactory', {
       from,
       args: [entrypoint.address, verifier.address],
-      gasLimit: 6e6,
       deterministicDeployment: true
     })
   console.log('==ZKPassAccountFactory addr=', factory.address)

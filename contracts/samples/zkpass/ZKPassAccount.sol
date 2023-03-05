@@ -90,14 +90,7 @@ contract ZKPassAccount is
         }
         uint256 opProof = uint256(bytes32(proof[256:]));
         
-        if (opHash > SNARK_SCALAR_FIELD) {
-            for (uint i = 0; i < 5; i++) {
-                opHash -= SNARK_SCALAR_FIELD;
-                if (opHash <= SNARK_SCALAR_FIELD) {
-                    break;
-                }
-            }
-        }
+        opHash %= SNARK_SCALAR_FIELD;
         
         uint256[5] memory input = [
             passHash,

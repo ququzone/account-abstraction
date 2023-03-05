@@ -29,14 +29,7 @@ export class ZKPassSigner extends Signer {
             throw new Error("nonce is null")
         }        
         let opHash = BigInt(hexlify(message))
-        if (opHash > this.SNARK_SCALAR_FIELD) {
-            for (let i = 0; i < 5; i++) {           
-                opHash -= this.SNARK_SCALAR_FIELD
-                if (opHash <= this.SNARK_SCALAR_FIELD) {
-                    break;
-                }
-            }
-        }
+        opHash %= this.SNARK_SCALAR_FIELD;
         const passport = this.passport - this.addr - this.nonce;
         const {proof, publicSignals} = await prove(
             this.addr,

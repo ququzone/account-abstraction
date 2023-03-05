@@ -44,7 +44,6 @@ describe('EntryPoint with VerifyingPaymaster', function () {
   describe('#parsePaymasterAndData', () => {
     it('should parse data properly', async () => {
       const paymasterAndData = hexConcat([paymaster.address, defaultAbiCoder.encode(['uint48', 'uint48'], [MOCK_VALID_UNTIL, MOCK_VALID_AFTER]), MOCK_SIG])
-      console.log(paymasterAndData)
       const res = await paymaster.parsePaymasterAndData(paymasterAndData)
       expect(res.validUntil).to.be.equal(ethers.BigNumber.from(MOCK_VALID_UNTIL))
       expect(res.validAfter).to.be.equal(ethers.BigNumber.from(MOCK_VALID_AFTER))

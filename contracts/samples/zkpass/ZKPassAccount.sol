@@ -20,6 +20,7 @@ contract ZKPassAccount is
     Initializable
 {
     event ZKPassAccountInitialized(IEntryPoint indexed entryPoint, uint256 indexed passHash);
+    uint256 immutable SNARK_SCALAR_FIELD = 21888242871839275222246405745257275088548364400416034343698204186575808495617;
 
     modifier onlyEntryPoint() {
         require(msg.sender == address(_entryPoint), "only EntryPoint");
@@ -64,16 +65,15 @@ contract ZKPassAccount is
 
     function _validateSignature(
         UserOperation calldata userOp,
-        bytes32 /*userOpHash*/
+        bytes32 userOpHash
     ) internal virtual override returns (uint256) {
-        // TODO should add userOpHash to circuits?
-        if(verifyProof(userOp.signature, _passHash, address(this), _nonce)) {
+        if(verifyProof(userOp.signature, _passHash, uint256(userOpHash))) {
             return 0;
         }
         return 1;
     }
 
-    function verifyProof(bytes memory proof, uint256 passHash, address addr, uint256 aNonce) public view returns (bool) {
+    function verifyProof(bytes calldata proof, uint256 passHash, uint256 opHash) public view returns (bool) {
         uint256[2] memory a;
         uint256[2][2] memory b;
         uint256[2] memory c;
@@ -82,16 +82,29 @@ contract ZKPassAccount is
                 uint256 proof0,uint256 proof1,uint256 proof2,uint256 proof3,
                 uint256 proof4,uint256 proof5,uint256 proof6,uint256 proof7
             ) = abi.decode(
-                proof, (uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)
+                proof[:256], (uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)
             );
             a = [proof0, proof1];
             b = [[proof2, proof3], [proof4, proof5]];
             c = [proof6, proof7];
         }
-        uint256[3] memory input = [
+        uint256 opProof = uint256(bytes32(proof[256:]));
+        
+        if (opHash > SNARK_SCALAR_FIELD) {
+            for (uint i = 0; i < 5; i++) {
+                opHash -= SNARK_SCALAR_FIELD;
+                if (opHash <= SNARK_SCALAR_FIELD) {
+                    break;
+                }
+            }
+        }
+        
+        uint256[5] memory input = [
             passHash,
-            uint256(uint160(addr)),
-            aNonce
+            opProof,
+            uint256(uint160(address(this))),
+            _nonce,
+            opHash
         ];
         return _verifier.verifyProof(a, b, c, input);
     }

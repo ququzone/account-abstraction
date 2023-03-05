@@ -1,5 +1,5 @@
 import { ethers } from "hardhat"
-import { defaultAbiCoder, hexConcat, hexlify, keccak256, toUtf8Bytes } from "ethers/lib/utils"
+import { hexConcat, hexlify, keccak256, toUtf8Bytes } from "ethers/lib/utils"
 
 import { ZKPassAccountFactory } from "../../typechain/"
 import { EntryPoint } from "../../typechain/contracts/core/EntryPoint"
@@ -20,6 +20,7 @@ async function main() {
         hexConcat([admin.address, hexlify(toUtf8Bytes(password!))])
     ))
     const {publicSignals} = await prove(
+        BigInt(0),
         BigInt(0),
         BigInt(0),
         passport

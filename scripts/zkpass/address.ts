@@ -19,6 +19,7 @@ async function main() {
     const {publicSignals} = await prove(
         BigInt(0),
         BigInt(0),
+        BigInt(0),
         passport
     )
     // const hexProof = defaultAbiCoder.encode(
